@@ -23,27 +23,23 @@ public class User {
 
     @JsonIgnore
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    @JoinTable(name = "user_has_lecture",
-                joinColumns = @JoinColumn(name = "user_id"),
-                inverseJoinColumns = @JoinColumn(name = "lecture_id"))
+    @JoinTable(name = "user_lectures",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "lecture_id"))
     private Set<Lecture> lectures = new HashSet<>();
 
-    public void addLectureToUser(Lecture lecture){
+    public void addLectureToUser(Lecture lecture) {
         lectures.add(lecture);
         lecture.getUsers().add(this);
     }
 
-    public void removeLectureToUser(Lecture lecture){
+    public void removeLectureToUser(Lecture lecture) {
         lectures.remove(lecture);
         lecture.getUsers().remove(this);
     }
 
     public boolean checkIfUserIsRegisteredAt(LocalDateTime start) {
-        for (Lecture l: lectures){
-            if (l.getStart().equals(start)){
-                return true;
-            }
-        }
-        return false;
+        return lectures.stream()
+                .anyMatch(lecture -> lecture.getStart().equals(start));
     }
 }

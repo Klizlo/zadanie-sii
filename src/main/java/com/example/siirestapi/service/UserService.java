@@ -1,15 +1,17 @@
 package com.example.siirestapi.service;
 
+import com.example.siirestapi.exception.LectureNotFoundException;
+import com.example.siirestapi.exception.UserNotFoundException;
 import com.example.siirestapi.model.Lecture;
 import com.example.siirestapi.model.User;
 import com.example.siirestapi.repository.LectureRepository;
 import com.example.siirestapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -18,39 +20,35 @@ public class UserService {
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
 
-    public List<User> getAllUsers(){
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    public ResponseEntity<?> getUserLectures(String login) {
-        User user = userRepository.findByLogin(login);
-        if (user == null){
-            return ResponseEntity.badRequest().body("Użytkownik o takim loginie nie istnieje");
-        }
-        return ResponseEntity.ok().body(user.getLectures());
+    public Set<Lecture> getUserLectures(String login) {
+        return userRepository.findByLogin(login)
+                .map(User::getLectures)
+                .orElseThrow(UserNotFoundException::new);
+
     }
 
     @Transactional
-    public ResponseEntity<String> changeEmail(String login, User user){
-        User userEdited = userRepository.findByLogin(login);
-        if(userEdited == null){
-            return ResponseEntity.badRequest().body("Użytkownik o podanym loginie nie istnieje");
-        }
+    public User updateUser(String login, User user) {
+        User userEdited = userRepository.findByLogin(login)
+                .orElseThrow(UserNotFoundException::new);
+
         userEdited.setEmail(user.getEmail());
-        return ResponseEntity.ok().body("Poprawnie zmieniono adres email");
+        return userEdited;
     }
 
     @Transactional
-    public ResponseEntity<String> cancelBooking(String login, Long id) {
-        User editedUser = userRepository.findByLogin(login);
-        if (editedUser == null){
-            return ResponseEntity.badRequest().body("Użytkownik o podanym loginie nie istnieje");
-        }
-        Lecture editedLecture = lectureRepository.findById(id).orElse(null);
-        if (editedLecture == null){
-            return ResponseEntity.badRequest().body("Nie istnieje taka prelekcja");
-        }
+    public User cancelBooking(String login, Long id) {
+        User editedUser = userRepository.findByLogin(login)
+                .orElseThrow(UserNotFoundException::new);
+
+        Lecture editedLecture = lectureRepository.findById(id)
+                .orElseThrow(LectureNotFoundException::new);
+
         editedUser.removeLectureToUser(editedLecture);
-        return ResponseEntity.ok().body("Pomyślnie zostałeś wypisany z prelekcji");
+        return editedUser;
     }
 }

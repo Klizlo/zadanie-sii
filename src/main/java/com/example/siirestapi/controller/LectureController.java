@@ -4,7 +4,6 @@ import com.example.siirestapi.model.Lecture;
 import com.example.siirestapi.model.User;
 import com.example.siirestapi.service.LectureService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +20,9 @@ public class LectureController {
     }
 
     @PutMapping("/lectures/{id}/users")
-    public ResponseEntity<String> addUserToLecture(@PathVariable Long id, @RequestBody User user){
+    public User addUserToLecture(@PathVariable Long id, @RequestBody User user){
         return lectureService.addUserToLecture(id, user);
     }
 
 }
+
