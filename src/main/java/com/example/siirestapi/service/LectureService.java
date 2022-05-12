@@ -1,5 +1,8 @@
 package com.example.siirestapi.service;
 
+import com.example.siirestapi.controller.dto.StatementDto;
+import com.example.siirestapi.controller.dto.StatementRecordHourDto;
+import com.example.siirestapi.controller.dto.StatementRecordLecturesDto;
 import com.example.siirestapi.exception.InvalidRegistrationToLectureException;
 import com.example.siirestapi.model.Lecture;
 import com.example.siirestapi.model.User;
@@ -9,7 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,4 +57,42 @@ public class LectureService {
         return foundUser;
     }
 
+    public StatementDto getLectureStatement() {
+
+        List<Lecture> lectures = lectureRepository.findAll();
+
+        long sumOfParticipants = lectures.stream()
+                .map(Lecture::getUsers)
+                .flatMap(Set::stream)
+                .distinct()
+                .count();
+
+        Set<LocalDateTime> localDateTimes = lectures.stream()
+                .map(Lecture::getStart)
+                .collect(Collectors.toSet());
+
+        StatementRecordHourDto statementRecordHourDto = new StatementRecordHourDto();
+
+        for (LocalDateTime time : localDateTimes){
+            float percentageOfParticipantsByHour = (float) lectures.stream()
+                    .filter(l -> l.getStart().equals(time))
+                    .map(Lecture::getUsers)
+                    .mapToLong(Set::size)
+                    .sum() / sumOfParticipants;
+            statementRecordHourDto.getPercentOfUsersByHour().put(time, percentageOfParticipantsByHour);
+        }
+
+        StatementRecordLecturesDto statementRecordLecturesDto = new StatementRecordLecturesDto();
+
+        for (Lecture lecture: lectures) {
+            float percentageOfParticipantsByLecture = (float) lecture.getUsers().size() / sumOfParticipants;
+            statementRecordLecturesDto.getPercentOfUsersByLectureName()
+                    .put(lecture.getName(), percentageOfParticipantsByLecture);
+        }
+
+        return StatementDto.builder()
+                .byHour(statementRecordHourDto)
+                .byLecture(statementRecordLecturesDto)
+                .build();
+    }
 }

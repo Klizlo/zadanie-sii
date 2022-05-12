@@ -1,5 +1,6 @@
 package com.example.siirestapi.controller;
 
+import com.example.siirestapi.controller.dto.StatementDto;
 import com.example.siirestapi.model.Lecture;
 import com.example.siirestapi.model.User;
 import com.example.siirestapi.service.LectureService;
@@ -22,6 +23,11 @@ public class LectureController {
     @PutMapping("/lectures/{id}/users")
     public User addUserToLecture(@PathVariable Long id, @RequestBody User user){
         return lectureService.addUserToLecture(id, user);
+    }
+
+    @GetMapping("/lectures/statement")
+    public StatementDto getLectureStatement(){
+        return lectureService.getLectureStatement();
     }
 
 }
