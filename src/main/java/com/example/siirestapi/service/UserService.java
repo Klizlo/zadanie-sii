@@ -48,7 +48,7 @@ public class UserService {
         Lecture editedLecture = lectureRepository.findById(id)
                 .orElseThrow(LectureNotFoundException::new);
 
-        editedUser.removeLectureToUser(editedLecture);
+        editedUser.signOut(editedLecture);
         return editedUser;
     }
 }

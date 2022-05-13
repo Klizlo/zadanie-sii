@@ -53,7 +53,7 @@ public class LectureService {
 
         emailService.sendEmail(foundUser, lecture);
 
-        lecture.addUserToLecture(foundUser);
+        lecture.signIn(foundUser);
         return foundUser;
     }
 

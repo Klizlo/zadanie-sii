@@ -28,12 +28,12 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "lecture_id"))
     private Set<Lecture> lectures = new HashSet<>();
 
-    public void addLectureToUser(Lecture lecture) {
+    public void signIn(Lecture lecture) {
         lectures.add(lecture);
         lecture.getUsers().add(this);
     }
 
-    public void removeLectureToUser(Lecture lecture) {
+    public void signOut(Lecture lecture) {
         lectures.remove(lecture);
         lecture.getUsers().remove(this);
     }

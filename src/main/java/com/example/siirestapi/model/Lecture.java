@@ -8,7 +8,6 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -32,12 +31,12 @@ public class Lecture {
     @ManyToMany(mappedBy = "lectures")
     private Set<User> users = new HashSet<>();
 
-    public void addUserToLecture(User user){
+    public void signIn(User user){
         users.add(user);
         user.getLectures().add(this);
     }
 
-    public void removeUserToLecture(User user){
+    public void signOut(User user){
         users.remove(user);
         user.getLectures().remove(this);
     }
